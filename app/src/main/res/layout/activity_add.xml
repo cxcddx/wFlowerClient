@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:app="http://schemas.android.com/apk/res-auto"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:background="#ffffff"
+              android:fitsSystemWindows="true"
+              android:orientation="vertical">
+    <include layout="@layout/view_actionbar"/>
+    <android.support.v4.widget.NestedScrollView
+        android:id="@+id/scrollview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+        >
+            <TimePicker
+                android:id="@+id/timepicker"
+                android:layout_width="match_parent"
+                android:layout_height="150dp"
+                android:background="@color/white"
+                android:timePickerMode="spinner"/>
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="8dp"
+                android:background="@color/bg_shadow"/>
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp">
+                <TextView
+                    android:id="@+id/use_title"
+                    style="@style/more_set_title"
+                    android:layout_margin="10dp"
+                    android:text="是否启用"/>
+                <CheckBox
+                    android:id="@+id/oc_chk"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerVertical="true"
+                    android:background="@drawable/checkbox_oc"
+                    android:button="@null"
+                    android:checked="true"
+
+                />
+
+            </RelativeLayout>
+            <TextView
+                style="@style/my_line"
+            />
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:gravity="center_vertical"
+            >
+                <TextView
+                    android:id="@+id/time_title"
+                    style="@style/more_set_title"
+                    android:layout_margin="10dp"
+                    android:text="喷洒时间（s）"/>
+                <EditText
+                    android:id="@+id/time_content"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:hint="请输入1~200之间的整数"
+                    android:textColorHint="@color/text_hint"
+                    android:textSize="14sp"
+                    android:background="@null"
+                    android:maxLength="3"
+                    android:singleLine="true"
+                    android:layout_margin="10dp"
+                    android:gravity="center_vertical|end"
+                    android:numeric="integer"
+                />
+
+            </RelativeLayout>
+            <TextView
+                style="@style/my_line"/>
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:gravity="center_vertical"
+            >
+                <TextView
+                    android:id="@+id/yield_title"
+                    style="@style/more_set_title"
+                    android:layout_margin="10dp"
+                    android:text="喷水量"/>
+                <com.warkiz.widget.IndicatorStayLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="10dp"
+                >
+
+                    <com.warkiz.widget.IndicatorSeekBar
+                        android:id="@+id/yield_seekbar"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        app:isb_indicator_color="@color/my_blue"
+                        app:isb_max="100"
+                        app:isb_min="30"
+                        app:isb_progress="50"
+                        app:isb_show_indicator="rectangle"
+                        app:isb_show_tick_texts="true"
+                        app:isb_thumb_color="@color/my_blue"
+                        app:isb_tick_texts_color="@color/my_blue_deep"
+                        app:isb_ticks_count="2"
+                        app:isb_track_progress_color="@color/my_blue_deep"/>
+                </com.warkiz.widget.IndicatorStayLayout>
+            </RelativeLayout>
+            <TextView
+                style="@style/my_line"/>
+            <TextView
+                android:id="@+id/set_title"
+                style="@style/more_set_title"
+                android:layout_marginTop="10dp"
+                android:layout_marginLeft="20dp"
+                android:layout_marginBottom="10dp"
+                android:text="重复"/>
+            <RadioGroup
+                android:id="@+id/rep_group"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="20dp"
+            >
+                <RadioButton
+                    android:id="@+id/everday"
+                    style="@style/radio_button"
+                    android:checked="true"
+                    android:text="每日"
+                />
+                <RadioButton
+                    android:id="@+id/rep_week"
+                    style="@style/radio_button"
+                    android:text="按周"
+                />
+                <RadioButton
+                    android:id="@+id/rep_mouth"
+                    style="@style/radio_button"
+                    android:text="按月"
+                />
+
+            </RadioGroup>
+
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/date_list"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="15dp"
+            >
+
+            </android.support.v7.widget.RecyclerView>
+
+        </LinearLayout>
+
+    </android.support.v4.widget.NestedScrollView>
+
+
+
+
+</LinearLayout>

@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+>
+    <LinearLayout
+        android:id="@+id/layout_bottom"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:orientation="vertical"
+    >
+        <Button
+            android:id="@+id/button_scan"
+            style="@android:style/Widget.Button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="查找设备"/>
+
+        <Button
+            android:id="@+id/button_cancel"
+            style="@android:style/Widget.Button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:onClick="OnCancel"
+            android:text="取消"/>
+
+    </LinearLayout>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/layout_bottom"
+        android:layout_alignParentTop="true"
+    >
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+        >
+            <TextView
+                android:id="@+id/title_new_devices"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="10dp"
+                android:background="@color/bg_shadow"
+                android:text="已配对设备"
+                android:textSize="16sp"
+                android:visibility="visible"/>
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="0.5sp"
+                android:background="@color/line"
+            />
+
+            <com.client.cx.wflowerclient.customerView.ListViewForScrollView
+                android:id="@+id/paired_devices"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="2"
+                android:stackFromBottom="true">
+
+
+            </com.client.cx.wflowerclient.customerView.ListViewForScrollView>
+            <TextView
+                android:id="@+id/title_new_devices2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/bg_shadow"
+                android:padding="10dp"
+                android:text="未配对设备"
+                android:textSize="16sp"
+                android:visibility="visible"/>
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="0.5sp"
+                android:background="@color/line"
+            />
+            <com.client.cx.wflowerclient.customerView.ListViewForScrollView
+                android:id="@+id/new_devices"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="2"
+                android:stackFromBottom="true"
+            />
+
+
+        </LinearLayout>
+    </ScrollView>
+
+</RelativeLayout>

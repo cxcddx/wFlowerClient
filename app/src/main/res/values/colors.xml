@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#2bb2f4</color>
+    <color name="colorPrimaryDark">#2bb2f4</color>
+    <color name="colorAccent">#FF4081</color>
+
+    <color name="bg_shadow">#DFDFDF</color>
+    <color name="line">#ff898989</color>
+    <color name="black">#282828</color>
+    <color name="text_light_gray">#999999</color>
+    <color name="my_blue">#2bb2f4</color>
+    <color name="my_blue_deep">#02A5F4</color>
+    <color name="white">#FFFFFF</color>
+    <color name="transparent">#00000000</color>
+    <color name="radiobuton_normal">#AADEF7</color>
+    <color name="text_hint">#b6b6b6</color>
+    <color name="my_green">#87C146</color>
+</resources>

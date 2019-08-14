@@ -1,0 +1,233 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.client.cx.wflowerclient.activity.MainActivity"
+>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" android:layout_alignParentTop="true"
+        android:orientation="vertical">
+        <include layout="@layout/view_actionbar"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="5dp"
+            android:layout_marginTop="5dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+            <RelativeLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="10dp"
+                android:layout_weight="2.5">
+                <TextView
+                    android:id="@+id/title"
+                    style="@style/more_set_title"
+                    android:text="时间校正"/>
+                <RelativeLayout
+                    android:id="@+id/time"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/title"
+                    android:layout_marginLeft="5dp"
+                    android:layout_marginTop="5dp">
+                    <TextView
+                        android:id="@+id/time_title"
+                        style="@style/more_set_content"
+                        android:text="设备时间："/>
+                    <TextView
+                        android:id="@+id/time_data"
+                        style="@style/more_set_content"
+                        android:layout_toRightOf="@id/time_title"/>
+                </RelativeLayout>
+
+            </RelativeLayout>
+            <RelativeLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:gravity="center"
+            >
+                <Button
+                    android:id="@+id/revise_btn"
+                    style="@style/my_btn"
+
+                    android:text="开始校正"/>
+
+            </RelativeLayout>
+        </LinearLayout>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="0.5dp"
+            android:layout_alignParentBottom="true"
+            android:background="@color/line"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="5dp"
+            android:layout_marginTop="5dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+            <RelativeLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="10dp"
+                android:layout_weight="2.5">
+                <TextView
+                    android:id="@+id/oc_title"
+                    style="@style/more_set_title"
+                    android:text="手动启停"/>
+
+                <!--<com.warkiz.widget.IndicatorStayLayout-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="wrap_content">-->
+
+                <!--<com.warkiz.widget.IndicatorSeekBar-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--app:isb_progress="30"-->
+                <!--app:isb_show_tick_marks_type="oval"-->
+                <!--app:isb_ticks_count="6" />-->
+
+                <!--</com.warkiz.widget.IndicatorStayLayout>-->
+                <com.warkiz.widget.IndicatorStayLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="18dp">
+
+                    <!--your layout-->
+
+                    <com.warkiz.widget.IndicatorSeekBar
+                        android:id="@+id/percent_indicator"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        app:isb_indicator_color="@color/my_blue"
+                        app:isb_max="100"
+                        app:isb_min="30"
+                        app:isb_progress="50"
+                        app:isb_show_indicator="rectangle"
+                        app:isb_show_tick_texts="true"
+                        app:isb_thumb_color="@color/my_blue"
+                        app:isb_tick_texts_color="@color/my_blue_deep"
+                        app:isb_ticks_count="2"
+                        app:isb_track_progress_color="@color/my_blue_deep"/>
+
+                    <!--your layout-->
+
+                </com.warkiz.widget.IndicatorStayLayout>
+
+            </RelativeLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:orientation="vertical"
+            >
+                <Button
+                    android:id="@+id/start_btn"
+                    style="@style/my_btn"
+                    android:text="启动"
+                />
+                <Button
+                    android:id="@+id/stop_btn"
+                    style="@style/my_btn"
+                    android:layout_marginTop="8dp"
+                    android:text="停止"
+                />
+
+
+            </LinearLayout>
+
+        </LinearLayout>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="10dp"
+            android:layout_alignParentBottom="true"
+            android:background="@color/bg_shadow"/>
+        <!--<com.github.airsaid.calendarview.widget.CalendarView-->
+        <!--android:id="@+id/calendarView"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="300dp"-->
+        <!--android:background="@android:color/white"-->
+        <!--app:cv_selectTextColor="@android:color/white"-->
+        <!--app:cv_textColor="#333333"-->
+        <!--app:cv_textSize="14sp"/>-->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:layout_marginBottom="5dp"
+            android:layout_marginTop="5dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+            <RelativeLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="10dp"
+                android:layout_weight="2.5">
+                <TextView
+                    android:id="@+id/set_title"
+                    style="@style/more_set_title"
+                    android:text="设置任务"/>
+
+            </RelativeLayout>
+            <RelativeLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:gravity="center"
+            >
+                <ImageView
+                    android:id="@+id/add_iv"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:src="@drawable/add"
+                    android:scaleType="fitXY"
+                />
+            </RelativeLayout>
+        </LinearLayout>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="0.5dp"
+            android:layout_alignParentBottom="true"
+            android:background="@color/line"/>
+    </LinearLayout>
+
+    <RelativeLayout
+        android:id="@+id/not_linked"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="?android:attr/actionBarSize"
+        android:background="@color/white"
+        android:visibility="gone"
+    >
+        <ImageView
+            android:id="@+id/not_linked_iv"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_centerInParent="true"
+            android:src="@drawable/link_fail"
+        />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/not_linked_iv"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="10dp"
+            android:text="哦哦，当前没有设备连接哟~\n请点击右上角连接一下吧"
+            android:textColor="@color/text_light_gray"
+            android:textSize="16sp"
+        />
+    </RelativeLayout>
+</RelativeLayout>
