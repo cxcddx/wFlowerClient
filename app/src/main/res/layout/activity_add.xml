@@ -28,8 +28,7 @@
                 android:background="@color/bg_shadow"/>
             <RelativeLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_margin="10dp">
+                android:layout_height="wrap_content">
                 <TextView
                     android:id="@+id/use_title"
                     style="@style/more_set_title"
@@ -54,7 +53,6 @@
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="10dp"
                 android:gravity="center_vertical"
             >
                 <TextView
@@ -84,7 +82,6 @@
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="10dp"
                 android:gravity="center_vertical"
             >
                 <TextView
@@ -96,6 +93,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="10dp"
+                    android:layout_marginTop="10dp"
                 >
 
                     <com.warkiz.widget.IndicatorSeekBar
@@ -106,6 +104,7 @@
                         app:isb_max="100"
                         app:isb_min="30"
                         app:isb_progress="50"
+                        android:paddingLeft="70dp"
                         app:isb_show_indicator="rectangle"
                         app:isb_show_tick_texts="true"
                         app:isb_thumb_color="@color/my_blue"
@@ -120,7 +119,7 @@
                 android:id="@+id/set_title"
                 style="@style/more_set_title"
                 android:layout_marginTop="10dp"
-                android:layout_marginLeft="20dp"
+                android:layout_marginLeft="10dp"
                 android:layout_marginBottom="10dp"
                 android:text="重复"/>
             <RadioGroup
@@ -128,8 +127,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:layout_marginLeft="20dp"
-                android:layout_marginRight="20dp"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
             >
                 <RadioButton
                     android:id="@+id/everday"

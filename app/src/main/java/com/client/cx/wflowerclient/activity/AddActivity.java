@@ -107,7 +107,6 @@ public class AddActivity extends AppCompatActivity implements View.OnClickListen
                         }
                         dateLength = DATE_LENGTH_NONE;
                         days = getDateList();
-//                        sendTask();
                         break;
                     case R.id.rep_week:
                         type = WEEK_EXE;
@@ -168,10 +167,6 @@ public class AddActivity extends AppCompatActivity implements View.OnClickListen
                 exit();
                 break;
         }
-    }
-
-    private void updateListDate(List<Integer> list) {
-        list = getDateList();
     }
 
     private List<Integer> getDateList() {

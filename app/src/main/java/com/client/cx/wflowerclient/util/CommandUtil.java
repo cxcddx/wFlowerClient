@@ -22,7 +22,8 @@ public class CommandUtil {
     private static final String OPEN = "OPEN";//手动开启
     private static final String CLOSE = "CLOSE";//手动关闭
     private static final String DEL_TASK = "DEL";//删除任务
-    private static final String query_TASK = "查询任务";//查询任务
+    private static final String QUERY_TASK = "INQTASK";//查询任务
+    private static final String QUERY_TIME = "INQTIME";//查询时间
 
     private BluetoothSocket _socket;
     private Context mContext;
@@ -134,11 +135,6 @@ public class CommandUtil {
         StringBuilder dayStr = new StringBuilder();
         //默认为0秒
         int second = 0;
-//        for (int i = 0; i < days.length -1;i++)
-//        {
-//            dayStr.append(days[i]).append(",");
-//        }
-//        dayStr.append(days[days.length -1]);
         for (int i = 0; i < days.size(); i++) {
             dayStr.append(days.get(i));
             if (i < days.size()-1) {
@@ -153,4 +149,14 @@ public class CommandUtil {
         sendMsg(str.toString());
 
     }
+
+    /**
+     * 查询设备时间
+     */
+    public void sendGetDeviceTime() {
+        StringBuilder str = new StringBuilder();
+        str.append(QUERY_TIME).append("\n");
+        sendMsg(str.toString());
+    }
+
 }

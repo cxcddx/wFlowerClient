@@ -66,6 +66,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (checkBlueTooth()) {
             onConnect();
             mCommandUtil = new CommandUtil(this, _socket);
+
+            //查询设备时间
+            getDeviceTime();
         }
 
     }
@@ -89,8 +92,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         mStartBtn.setOnClickListener(this);
         mStopBtn.setOnClickListener(this);
         mAddIv.setOnClickListener(this);
-
-
     }
 
 
@@ -133,7 +134,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             if (this.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, MY_PERMISSION_ACCESS_FINE_LOCATION);
                 Log.e("11111", "ACCESS_FINE_LOCATION");
-//                onConnect();
             }
         }
     }
@@ -316,7 +316,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     }
                     //发送显示消息，进行显示刷新
 //                    handler.sendMessage(handler.obtainMessage());
-                    String b = smsg;
+//                    String b = smsg;
+                    receiveMsg(smsg);
                     //此处处理板卡返回的信息
                 } catch (IOException e) {
                 }
@@ -348,6 +349,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
 
         }
+    }
+    //查询设备时间
+    private void getDeviceTime() {
+        new CommandUtil(this, _socket).sendGetDeviceTime();
     }
 
     /**
@@ -383,5 +388,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private void doStop() {
         new CommandUtil(this, _socket).sendStop();
     }
+
+    /**
+     * 处理接受到的消息
+     * @param smsg
+     */
+    private void receiveMsg(String smsg) {
+    }
+
 
 }
