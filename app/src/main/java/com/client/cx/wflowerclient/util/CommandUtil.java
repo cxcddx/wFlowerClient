@@ -131,7 +131,7 @@ public class CommandUtil {
      * @param hour  执行时间（时）
      * @param minute   执行时间（分）
      */
-    public void sendSetTask(int num, int type, List<Integer> days, int yield, int hour, int minute, String time) {
+    public void sendSetTask(int num, int type, List<Integer> days, int yield, int hour, int minute, int time) {
         StringBuilder dayStr = new StringBuilder();
         //默认为0秒
         int second = 0;
@@ -143,7 +143,7 @@ public class CommandUtil {
         }
 //        dayStr.append(days.get(days.size() -1));
         StringBuilder str = new StringBuilder();
-        str.append(ADD_TASK).append(num).append(":").append(type).append(",").append(days.size()).append(",")
+        str.append(ADD_TASK).append(":").append(num).append(",").append(type).append(",").append(days.size()).append(",")
                 .append(dayStr).append(",").append(hour).append(",").append(minute).append(",").append(second)
                 .append(",").append(yield).append(",").append(time).append("\n");
         sendMsg(str.toString());
@@ -156,6 +156,14 @@ public class CommandUtil {
     public void sendGetDeviceTime() {
         StringBuilder str = new StringBuilder();
         str.append(QUERY_TIME).append("\n");
+        sendMsg(str.toString());
+    }
+    /**
+     * 获取任务列表
+     */
+    public void sendGetTasks() {
+        StringBuilder str = new StringBuilder();
+        str.append(QUERY_TASK).append("\n");
         sendMsg(str.toString());
     }
 

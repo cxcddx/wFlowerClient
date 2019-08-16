@@ -19,6 +19,8 @@ import android.widget.Toast;
 
 import com.client.cx.wflowerclient.R;
 import com.client.cx.wflowerclient.adapter.MyDateAdapter;
+import com.client.cx.wflowerclient.bean.Task;
+import com.client.cx.wflowerclient.util.Constance;
 import com.warkiz.widget.IndicatorSeekBar;
 
 import java.util.ArrayList;
@@ -39,23 +41,21 @@ public class AddActivity extends AppCompatActivity implements View.OnClickListen
     private NestedScrollView mScrollView;
 
     private boolean isRun = true;//是否执行任务
-    private int num;//任务序号
-    private static final int MOUTH_EXE = 1;//按月执行
-    private static final int MOUTH_INEXE = 3;//按月执行,但任务挂起
-    private static final int WEEK_EXE = 2;//按周执行
-    private static final int WEEK_INEXE = 4;//按周执行，但任务挂起
+    //    private int num;//任务序号
+
     private int type;
     private List<Integer> days;
     private int taskHour;
     private int taskMinute;
     private int yield;
+    private int num;//任务编号
 
     private int dateLength;//日期长度，按周为7，按月为31
-    private static final int DATE_LENGTH_NONE = 0;//按周
     private static final int DATE_LENGTH_WEEK = 7;//按周
     private static final int DATE_LENGTH_MOUTH = 31;//按月
 
     private MyDateAdapter mAdapter;
+    private boolean isFirst = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -101,26 +101,32 @@ public class AddActivity extends AppCompatActivity implements View.OnClickListen
                     case R.id.everday:
                         //每天
                         if (isRun) {
-                            type = WEEK_EXE;
+                            type = Constance.WEEK_EXE;
                         } else {
-                            type = WEEK_INEXE;
+                            type = Constance.WEEK_INEXE;
                         }
-                        dateLength = DATE_LENGTH_NONE;
+                        dateLength = DATE_LENGTH_WEEK;
                         days = getDateList();
+                        mDateList.setVisibility(View.GONE);
                         break;
                     case R.id.rep_week:
-                        type = WEEK_EXE;
-                        dateLength = DATE_LENGTH_WEEK;
                         //按周
+                        type = Constance.WEEK_EXE;
+                        dateLength = DATE_LENGTH_WEEK;
+                        mDateList.setVisibility(View.VISIBLE);
+
                         break;
                     case R.id.rep_mouth:
                         //按月
-                        type = MOUTH_EXE;
+                        type = Constance.MOUTH_EXE;
                         dateLength = DATE_LENGTH_MOUTH;
+                        mDateList.setVisibility(View.VISIBLE);
                         break;
                 }
-                mAdapter.setDateList(getDateList());
-                mAdapter.notifyDataSetChanged();
+                if (!isFirst) {
+                    mAdapter.setDateList(getDateList());
+                    mAdapter.notifyDataSetChanged();
+                }
 
                 mScrollView.post(new Runnable() {
                     @Override
@@ -135,24 +141,64 @@ public class AddActivity extends AppCompatActivity implements View.OnClickListen
 
     private void initData() {
         Intent intent = getIntent();
-        num = intent.getIntExtra("num", 1);
-        mActionBarTitle.setText("设置任务");
+        String taskType = intent.getStringExtra("type");
+        if ("edit".equals(taskType)) {
+            //编辑任务
+            Task task = (Task) (intent.getSerializableExtra("task"));
+
+            num = task.getNum();
+            mActionBarTitle.setText("编辑任务" + num);
+            mTimePicker.setCurrentHour(task.getHour());
+            mTimePicker.setCurrentMinute(task.getMinute());
+            mYieldSeekBar.setProgress(task.getYield());
+            mTimeEt.setText(task.getTime() + "");
+            type = task.getType();
+            //根据type，设置任务是否启用
+            if (type == Constance.MOUTH_EXE || type == Constance.WEEK_EXE) {
+                mOcChk.setChecked(true);
+                isRun = true;
+            } else {
+                mOcChk.setChecked(false);
+                isRun = false;
+            }
+
+            //设置重复日期列表
+            if (type == Constance.MOUTH_EXE || type == Constance.MOUTH_INEXE) {
+                mRepGroup.check(R.id.rep_mouth);
+                dateLength = DATE_LENGTH_MOUTH;
+            } else {
+                mRepGroup.check(R.id.rep_week);
+                dateLength = DATE_LENGTH_WEEK;
+            }
+            days = task.getDays();
+        } else if ("add".equals(taskType)) {
+            //新增任务
+            num = intent.getIntExtra("num", 0);
+            mActionBarTitle.setText("新增任务" + num);
+
+            type = Constance.WEEK_EXE;
+            //初始化日期列表,默认选中每日
+            dateLength = DATE_LENGTH_WEEK;
+            days = getDateList();
+
+        }
+
+        mDateList.setVisibility(View.VISIBLE);
+        GridLayoutManager manager = new GridLayoutManager(this, 7);
+        mDateList.setLayoutManager(manager);
+        mAdapter = new MyDateAdapter(this, days);
+        mDateList.setAdapter(mAdapter);
+
         mActionBarRightTitle.setText("保存");
         mReturnBtn.setVisibility(View.VISIBLE);
         //设置时间显示为24小时制
         mTimePicker.setIs24HourView(true);
         //默认为按周执行
-        type = WEEK_EXE;
-        days = getDateList();
+//        type = WEEK_EXE;
         taskHour = mTimePicker.getCurrentHour();
         taskMinute = mTimePicker.getCurrentMinute();
 
-        //初始化日期列表,默认选中每日
-        dateLength = DATE_LENGTH_NONE;
-        GridLayoutManager manager = new GridLayoutManager(this, 7);
-        mDateList.setLayoutManager(manager);
-        mAdapter = new MyDateAdapter(this, getDateList());
-        mDateList.setAdapter(mAdapter);
+        isFirst = false;
 
     }
 
@@ -179,7 +225,9 @@ public class AddActivity extends AppCompatActivity implements View.OnClickListen
     }
 
     private void sendTask() {
-        days = mAdapter.getSelectList();
+        if (mRepGroup.getCheckedRadioButtonId() != R.id.everday) {
+            days = mAdapter.getSelectList();
+        }
         yield = mYieldSeekBar.getProgress();
         String time = mTimeEt.getText().toString();
         if (TextUtils.isEmpty(time)) {
@@ -190,7 +238,7 @@ public class AddActivity extends AppCompatActivity implements View.OnClickListen
             Toast.makeText(this, "请确保喷洒时间为1~200之间的整数", Toast.LENGTH_SHORT).show();
             return;
         }
-        MainActivity.mCommandUtil.sendSetTask(num, type, days, yield, taskHour, taskMinute, time);
+        MainActivity.mCommandUtil.sendSetTask(num, type, days, yield, taskHour, taskMinute, Integer.parseInt(time));
     }
 
     /**

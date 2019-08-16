@@ -12,7 +12,6 @@
         android:src="@drawable/return_icon"
         android:background="@color/transparent"
         android:layout_marginLeft="10dp"
-        android:visibility="gone"
     />
     <TextView
         android:id="@+id/title"

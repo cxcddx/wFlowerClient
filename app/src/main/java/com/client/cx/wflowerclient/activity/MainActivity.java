@@ -1,17 +1,22 @@
 package com.client.cx.wflowerclient.activity;
 
-import android.Manifest;
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
+import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
+import android.support.annotation.RequiresApi;
+import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
@@ -21,12 +26,22 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.client.cx.wflowerclient.R;
+import com.client.cx.wflowerclient.adapter.MyTaskAdapter;
+import com.client.cx.wflowerclient.bean.Task;
+import com.client.cx.wflowerclient.customerView.Divider;
 import com.client.cx.wflowerclient.util.CommandUtil;
 import com.warkiz.widget.IndicatorSeekBar;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.UUID;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
@@ -45,15 +60,32 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private String smsg = "";    //显示用数据缓存
     private String fmsg = "";    //保存用数据缓存
     private String address; //连接地址
+    private long millisTime;//后台计时
 
     private ImageButton mReturnIB;
-    private TextView mLinkTv;
+    private TextView mLinkTv, mTimeTv;
     private RelativeLayout mLayoutNotLinked;
     private Button mReviseBtn, mStartBtn, mStopBtn;
     private IndicatorSeekBar mSeekBar;
     private ImageView mAddIv;
+    private RecyclerView mTaskRecyclerView;
+    private SwipeRefreshLayout mSwipeRefreshLayout;
+
+    private MyTaskAdapter mAdapter;
 
     public static CommandUtil mCommandUtil;
+    private static final String TIME_REVISE = "TIME";//时间设定
+    private static final String ADD_TASK = "SET";//添加任务
+    private static final String OPEN = "OPEN";//手动开启
+    private static final String CLOSE = "CLOSE";//手动关闭
+    private static final String DEL_TASK = "DEL";//删除任务
+    private static final String QUERY_TASK = "INQTASK";//查询任务
+    private static final String QUERY_TIME = "INQTIME";//查询时间
+    private static final String INVALID = "INVALID";//无效指令
+    Timer mTimer1 = null;//定时器
+    TimerTask mTask1 = null;
+    List<Task> tasks = new ArrayList<>();//任务列表
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,15 +93,55 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setContentView(R.layout.activity_main);
         initView();
         //权限检测
-        checkPermission();
+//        checkPermission();
         //打卡本地蓝牙并设置可搜索
         if (checkBlueTooth()) {
             onConnect();
             mCommandUtil = new CommandUtil(this, _socket);
-
-            //查询设备时间
-            getDeviceTime();
         }
+
+        initData();
+
+    }
+
+    private void initData() {
+
+//        final List<Task> tasks = new ArrayList<>();
+        mAdapter = new MyTaskAdapter(this, tasks);
+        mAdapter.setOnremoveListnner(new MyTaskAdapter.OnremoveListnner() {
+            @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+            @Override
+            public void ondelect(final int i) {
+
+                AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this)
+                        .setMessage("确定删除任务" + tasks.get(i).getNum() + "吗？")
+                        .setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                tasks.remove(i);
+                                mAdapter.notifyDataSetChanged();
+//                                Toast.makeText(MainActivity.this, "" + i, Toast.LENGTH_SHORT).show();
+                            }
+                        })
+                        .setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+
+                            }
+                        });
+                builder.show();
+
+
+            }
+        });
+
+        LinearLayoutManager manager = new LinearLayoutManager(this);
+        mTaskRecyclerView.addItemDecoration(Divider.builder().
+                color(getResources().getColor(R.color.bg_shadow))
+                .height(1)
+                .build());
+        mTaskRecyclerView.setLayoutManager(manager);
+        mTaskRecyclerView.setAdapter(mAdapter);
 
     }
 
@@ -79,30 +151,44 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private void initView() {
         mReturnIB = (ImageButton) this.findViewById(R.id.return_back);
         mLinkTv = (TextView) this.findViewById(R.id.right_title);
+        mTimeTv = (TextView) this.findViewById(R.id.time_data);
         mLayoutNotLinked = (RelativeLayout) this.findViewById(R.id.not_linked);
         mReviseBtn = (Button) this.findViewById(R.id.revise_btn);
         mStartBtn = (Button) this.findViewById(R.id.start_btn);
         mStopBtn = (Button) this.findViewById(R.id.stop_btn);
         mSeekBar = (IndicatorSeekBar) this.findViewById(R.id.percent_indicator);
         mAddIv = (ImageView) this.findViewById(R.id.add_iv);
+        mTaskRecyclerView = (RecyclerView) this.findViewById(R.id.task_list);
+        mSwipeRefreshLayout = (SwipeRefreshLayout) this.findViewById(R.id.swipeRefreshLayout);
 
+        mReturnIB.setImageResource(R.drawable.refresh);
         mReturnIB.setOnClickListener(this);
         mLinkTv.setOnClickListener(this);
         mReviseBtn.setOnClickListener(this);
         mStartBtn.setOnClickListener(this);
         mStopBtn.setOnClickListener(this);
         mAddIv.setOnClickListener(this);
+        mSwipeRefreshLayout.setProgressBackgroundColorSchemeColor(getResources().getColor(R.color.my_blue));
+        mSwipeRefreshLayout.setColorSchemeColors(getResources().getColor(R.color.white));
+        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                getTasks();
+            }
+        });
     }
 
 
     @Override
     protected void onStart() {
         super.onStart();
-//        refreshView();
+        refreshView();
         if (TextUtils.isEmpty(address)) {
             return;
         }
-        linkBluetooth(address);
+//        linkBluetooth(address);
+//        //查询设备时间
+//        getDeviceTime();
     }
 
     //关闭程序调用处理部分
@@ -122,21 +208,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     /**
      * 权限检测
      */
-    private void checkPermission() {
+//    private void checkPermission() {
     /* 解决兼容性问题，6.0以上使用新的API*/
-        final int MY_PERMISSION_ACCESS_COARSE_LOCATION = 11;
-        final int MY_PERMISSION_ACCESS_FINE_LOCATION = 12;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (this.checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                requestPermissions(new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, MY_PERMISSION_ACCESS_COARSE_LOCATION);
-                Log.e("11111", "ACCESS_COARSE_LOCATION");
-            }
-            if (this.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, MY_PERMISSION_ACCESS_FINE_LOCATION);
-                Log.e("11111", "ACCESS_FINE_LOCATION");
-            }
-        }
-    }
+//        final int MY_PERMISSION_ACCESS_COARSE_LOCATION = 11;
+//        final int MY_PERMISSION_ACCESS_FINE_LOCATION = 12;
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+//            if (this.checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+//                requestPermissions(new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, MY_PERMISSION_ACCESS_COARSE_LOCATION);
+//                Log.e("11111", "ACCESS_COARSE_LOCATION");
+//            }
+//            if (this.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+//                requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, MY_PERMISSION_ACCESS_FINE_LOCATION);
+//                Log.e("11111", "ACCESS_FINE_LOCATION");
+//            }
+//        }
+//    }
 
     /**
      * 打卡本地蓝牙并设置可搜索
@@ -183,6 +269,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 is.close();
                 _socket.close();
                 _socket = null;
+                Intent serverIntent = new Intent(this, DeviceListActivity.class); //跳转程序设置
+                startActivityForResult(serverIntent, REQUEST_CONNECT_DEVICE);  //设置返回宏定义
 
             } catch (IOException e) {
             } catch (InterruptedException e) {
@@ -203,6 +291,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     address = data.getExtras()
                             .getString(DeviceListActivity.EXTRA_DEVICE_ADDRESS);
                     linkBluetooth(address);
+                    //查询设备时间
+                    getDeviceTime();
+                    //获取任务列表
+//                    getTasks();
 
                 }
                 break;
@@ -218,6 +310,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         // 用服务号得到socket
         try {
             _socket = _device.createRfcommSocketToServiceRecord(UUID.fromString(MY_UUID));
+
         } catch (IOException e) {
             isLinked = false;
             Toast.makeText(this, "连接失败！", Toast.LENGTH_SHORT).show();
@@ -264,16 +357,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
      * 根据蓝牙是否连接成功，刷新界面
      */
     private void refreshView() {
-//        if(isLinked) {
-//            mLayoutNotLinked.setVisibility(View.GONE);
-//        } else {
-//            mLayoutNotLinked.setVisibility(View.VISIBLE);
-//        }
+        if (isLinked) {
+            mLayoutNotLinked.setVisibility(View.GONE);
+        } else {
+            mLayoutNotLinked.setVisibility(View.VISIBLE);
+        }
     }
 
     //接收数据线程
     Thread readThread = new Thread() {
 
+        @Override
         public void run() {
             int num = 0;
             byte[] buffer = new byte[1024];
@@ -315,9 +409,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         }
                     }
                     //发送显示消息，进行显示刷新
-//                    handler.sendMessage(handler.obtainMessage());
-//                    String b = smsg;
-                    receiveMsg(smsg);
+//                    System.out.println("****************msg=" + smsg);
+                    Message message = Message.obtain();
+                    message.obj = smsg;
+                    handler.sendMessage(message);
+                    smsg = "";
                     //此处处理板卡返回的信息
                 } catch (IOException e) {
                 }
@@ -325,10 +421,166 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     };
 
+    //消息处理队列
+    Handler handler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+
+            System.out.println("1111111111111111111msg = " + msg);
+            String receiveMsg = msg.obj.toString();
+            //将收到的指令分成三段
+            String[] msgArr = receiveMsg.split(":");
+            //获取指令标志，并根据标志匹配指令
+            if (msgArr.length < 1) {
+                return;
+            }
+            String data = "";
+            if (msgArr.length >= 3) {
+                data = msgArr[2].replaceAll("\n","");
+            }
+            switch (msgArr[0]) {
+                case TIME_REVISE:
+                    //时间设定
+                    Toast.makeText(MainActivity.this, "时间已校正" + data, Toast.LENGTH_SHORT).show();
+                    startTimeTask(data);
+                    break;
+                case ADD_TASK:
+                    //添加任务
+                    break;
+                case OPEN:
+                    //手动开启
+                    Toast.makeText(MainActivity.this, "开启成功", Toast.LENGTH_SHORT).show();
+                    mSeekBar.setProgress(Float.parseFloat(data));
+                    break;
+                case CLOSE:
+                    //手动关闭
+                    Toast.makeText(MainActivity.this, "关闭成功", Toast.LENGTH_SHORT).show();
+                    break;
+                case DEL_TASK:
+                    //删除任务
+                    break;
+                case QUERY_TASK:
+                    //查询任务
+                    //关闭下拉刷新
+                    mSwipeRefreshLayout.setRefreshing(false);
+                    String[] taskArr = data.split("\\&");
+                    if (taskArr == null || taskArr.length < 1) {
+                        return;
+                    }
+                    tasks.clear();
+                    //根据返回的指令，获取task信息
+                    for (int i = 1; i< taskArr.length; i++) {
+                        String taskDetailStr = taskArr[i];
+                        String[] taskDetailArr = taskDetailStr.split(",");
+                        if (taskDetailArr == null || taskDetailArr.length < 1) {
+                            return;
+                        }
+                        Task task = new Task();
+                        task.setNum(Integer.parseInt(taskDetailArr[0]));
+                        task.setType(Integer.parseInt(taskDetailArr[1]));
+                        //获取重复日期总天数
+                        int dayNum = Integer.parseInt(taskDetailArr[2]);
+                        List<Integer> days = new ArrayList<>();
+                        //取出重复日期列表
+                        for(int d = 3; d < 3 + dayNum; d++) {
+                            days.add(Integer.parseInt(taskDetailArr[d]));
+                        }
+                        task.setDays(days);
+                        task.setHour(Integer.parseInt(taskDetailArr[3+dayNum]));
+                        task.setMinute(Integer.parseInt(taskDetailArr[3 + dayNum + 1]));
+                        task.setSec(Integer.parseInt(taskDetailArr[3 + dayNum + 2]));
+                        task.setYield(Integer.parseInt(taskDetailArr[3 + dayNum + 3]));
+                        task.setTime(Integer.parseInt(taskDetailArr[3 + dayNum + 4]));
+
+                        tasks.add(task);
+                    }
+                    updateTaskList(tasks);
+                    mSwipeRefreshLayout.setRefreshing(false);
+                    break;
+                case QUERY_TIME:
+                    //查询时间
+                    Toast.makeText(MainActivity.this, "设备时间已获取", Toast.LENGTH_SHORT).show();
+                    startTimeTask(data);
+                    //开启查询任务指令
+                    getTasks();
+                    break;
+                case INVALID:
+                    //无效指令
+                    break;
+                default:
+                    break;
+            }
+        }
+    };
+
+    //刷新设备列表
+    private void updateTaskList(List<Task> tasks) {
+        mAdapter.updatedatas(tasks);
+        mAdapter.notifyDataSetChanged();
+    }
+
+
+    private void startTimeTask(String data) {
+        Calendar c = Calendar.getInstance();
+        try {
+            //将字符串数据转化为毫秒数
+            c.setTime(new SimpleDateFormat("yyyy,MM,dd,HH,mm,ss").parse(data));
+//                        System.out.println("时间转化后的毫秒数为：" + c.getTimeInMillis());
+            millisTime = c.getTimeInMillis();
+
+            // 将毫秒数转化为时间
+            mTimeTv.setText(updateDeviceTime());
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+        //开启计时器
+
+        if (mTimer1 == null && mTask1 == null) {
+            mTimer1 = new Timer();
+            mTask1 = new TimerTask() {
+                @Override
+                public void run() {
+                    Message message = timeHandler.obtainMessage(1);
+                    timeHandler.sendMessage(message);
+                }
+            };
+            mTimer1.schedule(mTask1, 0, 1000);
+        }
+    }
+
+    /**
+     * 更新设备时间
+     *
+     * @return
+     */
+    private String updateDeviceTime() {
+        String time;
+        Date date = new Date(millisTime);
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+//                        System.out.println("毫秒数转化后的时间为：" + sdf.format(date));
+        time = sdf.format(date);
+        return time;
+    }
+
+    //设备时间显示
+    Handler timeHandler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            millisTime += 1000;
+            mTimeTv.setText(updateDeviceTime());
+
+        }
+    };
+
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.return_back:
+                getDeviceTime();
+                mSwipeRefreshLayout.setRefreshing(true);
                 break;
             case R.id.right_title:
                 onConnect();
@@ -350,9 +602,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         }
     }
+
     //查询设备时间
     private void getDeviceTime() {
         new CommandUtil(this, _socket).sendGetDeviceTime();
+    }
+
+    //获取任务列表
+    private void getTasks() {
+        new CommandUtil(this, _socket).sendGetTasks();
     }
 
     /**
@@ -360,7 +618,34 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
      */
     private void goAddActivity() {
         mCommandUtil = new CommandUtil(this, _socket);
+        //新增任务时，判断新增的任务编号，若编号队列中有空缺，则为空缺，若无空缺，则为末尾编号加1
+        int addNum = 0;
+        if (tasks == null || tasks.size() <1) {
+            //当无任务列表时，新增任务编号为1
+            addNum = 1;
+        } else if (tasks.size() > 20){
+            Toast.makeText(MainActivity.this, "当前已存在20条任务，不能再新增，请删除部分任务再试吧", Toast.LENGTH_LONG).show();
+            return;
+        } else {
+            if (tasks.get(0).getNum() != 1) {
+                //编号1空缺，则新增编号为编号1
+                addNum = 1;
+            } else{
+                for (int i = 1; i < tasks.size(); i++) {
+                    //中途空缺，这新增编号为空缺编号
+                    if (tasks.get(i).getNum() - tasks.get(i - 1).getNum() > 1) {
+                        addNum = tasks.get(i).getNum() + 1;
+                        break;
+                    }
+                    //编号无空缺，则新增编号为末尾编号加1
+                    addNum = tasks.get(tasks.size() -1).getNum() + 1;
+                }
+            }
+        }
+
         Intent intent = new Intent(MainActivity.this, AddActivity.class);
+        intent.putExtra("num", addNum);
+        intent.putExtra("type", "add");
         this.startActivity(intent);
     }
 
@@ -390,10 +675,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     /**
-     * 处理接受到的消息
+     * 处理接收到的消息
+     *
      * @param smsg
      */
     private void receiveMsg(String smsg) {
+//        String a = smsg;
+//        System.out.println("********************smsg = " + smsg);
     }
 
 
