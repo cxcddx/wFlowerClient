@@ -11,6 +11,7 @@ import android.widget.TextView;
 
 import com.client.cx.wflowerclient.R;
 import com.client.cx.wflowerclient.activity.AddActivity;
+import com.client.cx.wflowerclient.activity.MainActivity;
 import com.client.cx.wflowerclient.bean.Task;
 import com.client.cx.wflowerclient.util.Constance;
 
@@ -58,6 +59,27 @@ public class MyTaskAdapter extends RecyclerView.Adapter<MyTaskAdapter.MyViewHold
             holder.mOcChk.setChecked(false);
         }
 
+        holder.mOcChk.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Task task = datas.get(position);
+                int type = datas.get(position).getType();
+                if (type == Constance.MOUTH_EXE || type == Constance.MOUTH_INEXE) {
+                    if (((CheckBox)v).isChecked()) {
+                        task.setType(Constance.MOUTH_EXE);
+                    } else {
+                        task.setType(Constance.MOUTH_INEXE);
+                    }
+                } else {
+                    if (((CheckBox)v).isChecked()) {
+                        task.setType(Constance.WEEK_EXE);
+                    } else {
+                        task.setType(Constance.WEEK_INEXE);
+                    }
+                }
+                MainActivity.mCommandUtil.sendSetTask(task);
+            }
+        });
 
         holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
@@ -65,6 +87,7 @@ public class MyTaskAdapter extends RecyclerView.Adapter<MyTaskAdapter.MyViewHold
                 if (onremoveListnner != null) {
                     onremoveListnner.ondelect(position);
                 }
+
                 return true;
             }
         });

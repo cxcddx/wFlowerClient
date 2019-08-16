@@ -5,11 +5,12 @@ import android.content.Context;
 import android.text.TextUtils;
 import android.widget.Toast;
 
+import com.client.cx.wflowerclient.bean.Task;
+
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.List;
 
 /**
  * @author cx
@@ -124,28 +125,22 @@ public class CommandUtil {
 
     /**
      * 设置任务
-     * @param num 任务序号
-     * @param type 任务类型
-     * @param days 执行日期
-     * @param yield  喷水量
-     * @param hour  执行时间（时）
-     * @param minute   执行时间（分）
      */
-    public void sendSetTask(int num, int type, List<Integer> days, int yield, int hour, int minute, int time) {
+    public void sendSetTask(Task task) {
         StringBuilder dayStr = new StringBuilder();
         //默认为0秒
         int second = 0;
-        for (int i = 0; i < days.size(); i++) {
-            dayStr.append(days.get(i));
-            if (i < days.size()-1) {
+        for (int i = 0; i < task.getDays().size(); i++) {
+            dayStr.append(task.getDays().get(i));
+            if (i < task.getDays().size()-1) {
                 dayStr.append(",");
             }
         }
 //        dayStr.append(days.get(days.size() -1));
         StringBuilder str = new StringBuilder();
-        str.append(ADD_TASK).append(":").append(num).append(",").append(type).append(",").append(days.size()).append(",")
-                .append(dayStr).append(",").append(hour).append(",").append(minute).append(",").append(second)
-                .append(",").append(yield).append(",").append(time).append("\n");
+        str.append(ADD_TASK).append(":").append(task.getNum()).append(",").append(task.getType()).append(",").append(task.getDays().size()).append(",")
+                .append(dayStr).append(",").append(task.getHour()).append(",").append(task.getMinute()).append(",").append(second)
+                .append(",").append(task.getYield()).append(",").append(task.getTime()).append("\n");
         sendMsg(str.toString());
 
     }
@@ -166,5 +161,14 @@ public class CommandUtil {
         str.append(QUERY_TASK).append("\n");
         sendMsg(str.toString());
     }
+    /**
+     * 删除任务
+     */
+    public void sendDelTask(int num) {
+        StringBuilder str = new StringBuilder();
+        str.append(DEL_TASK).append(":").append(num).append("\n");
+        sendMsg(str.toString());
+    }
+
 
 }

@@ -20,15 +20,27 @@ import java.util.List;
  */
 public class MyDateAdapter extends RecyclerView.Adapter<MyDateAdapter.MyViewHolder> {
     private List<Integer> dateList = new ArrayList<>();
+    private List<Integer> initCheckedList = new ArrayList<>();
     private Context mContext;
     SparseBooleanArray mSelectedPositions = new SparseBooleanArray();
 
 
-    public MyDateAdapter(Context context, List<Integer> dateList) {
+    public MyDateAdapter(Context context, List<Integer> dateList, List<Integer> checkedList) {
         this.mContext = context;
         this.dateList = dateList;
-        for (int i = 0; i < dateList.size(); i++) {
-            setItemChecked(i, false);
+        this.initCheckedList = checkedList;
+        if (!(initCheckedList != null && initCheckedList.size()>0)) {
+            for (int i = 0; i < dateList.size(); i++) {
+                setItemChecked(i, false);
+            }
+        } else {
+            for (int i = 0; i < dateList.size(); i++) {
+                if (checkedList.contains(dateList.get(i))) {
+                    setItemChecked(i, true);
+                } else {
+                    setItemChecked(i, false);
+                }
+            }
         }
     }
 

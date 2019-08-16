@@ -30,6 +30,7 @@ import java.util.List;
  * 添加任务页面
  */
 public class AddActivity extends AppCompatActivity implements View.OnClickListener {
+    public static AddActivity instance = null;
     private TimePicker mTimePicker;
     private TextView mActionBarTitle, mActionBarRightTitle;
     private ImageButton mReturnBtn;
@@ -140,6 +141,7 @@ public class AddActivity extends AppCompatActivity implements View.OnClickListen
     }
 
     private void initData() {
+        instance = this;
         Intent intent = getIntent();
         String taskType = intent.getStringExtra("type");
         if ("edit".equals(taskType)) {
@@ -171,6 +173,8 @@ public class AddActivity extends AppCompatActivity implements View.OnClickListen
                 dateLength = DATE_LENGTH_WEEK;
             }
             days = task.getDays();
+            mAdapter = new MyDateAdapter(this, getDateList(), days);
+            mDateList.setVisibility(View.VISIBLE);
         } else if ("add".equals(taskType)) {
             //新增任务
             num = intent.getIntExtra("num", 0);
@@ -180,13 +184,15 @@ public class AddActivity extends AppCompatActivity implements View.OnClickListen
             //初始化日期列表,默认选中每日
             dateLength = DATE_LENGTH_WEEK;
             days = getDateList();
+            mAdapter = new MyDateAdapter(this, days, null);
+            mDateList.setVisibility(View.GONE);
 
         }
 
-        mDateList.setVisibility(View.VISIBLE);
+
         GridLayoutManager manager = new GridLayoutManager(this, 7);
         mDateList.setLayoutManager(manager);
-        mAdapter = new MyDateAdapter(this, days);
+
         mDateList.setAdapter(mAdapter);
 
         mActionBarRightTitle.setText("保存");
@@ -201,6 +207,7 @@ public class AddActivity extends AppCompatActivity implements View.OnClickListen
         isFirst = false;
 
     }
+
 
     @Override
     public void onClick(View v) {
@@ -238,7 +245,16 @@ public class AddActivity extends AppCompatActivity implements View.OnClickListen
             Toast.makeText(this, "请确保喷洒时间为1~200之间的整数", Toast.LENGTH_SHORT).show();
             return;
         }
-        MainActivity.mCommandUtil.sendSetTask(num, type, days, yield, taskHour, taskMinute, Integer.parseInt(time));
+        Task task = new Task();
+        task.setNum(num);
+        task.setType(type);
+        task.setDays(days);
+        task.setYield(yield);
+        task.setHour(taskHour);
+        task.setMinute(taskMinute);
+        task.setTime(Integer.parseInt(time));
+//        MainActivity.mCommandUtil.sendSetTask(num, type, days, yield, taskHour, taskMinute, Integer.parseInt(time));
+        MainActivity.mCommandUtil.sendSetTask(task);
     }
 
     /**
@@ -247,4 +263,6 @@ public class AddActivity extends AppCompatActivity implements View.OnClickListen
     private void exit() {
         this.finish();
     }
+
+
 }

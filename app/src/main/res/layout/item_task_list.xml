@@ -54,6 +54,8 @@
                 android:gravity="center"
                 android:textColor="@color/black"
                 android:text="每周 1、2、3"
+                android:singleLine="true"
+                android:ellipsize="end"
                 android:textSize="14sp" />
         </RelativeLayout>
         <RelativeLayout

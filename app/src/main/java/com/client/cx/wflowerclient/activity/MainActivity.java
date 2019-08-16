@@ -49,6 +49,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private final static int REQUEST_CONNECT_DEVICE = 1;    //宏定义查询设备句柄
     private final static String MY_UUID = "00001101-0000-1000-8000-00805F9B34FB";   //SPP服务UUID号(蓝牙串口服务)
 
+
     private BluetoothAdapter _bluetooth = BluetoothAdapter.getDefaultAdapter();    //获取本地蓝牙适配器，即蓝牙设备
     BluetoothDevice _device = null;     //蓝牙设备
     BluetoothSocket _socket = null;      //蓝牙通信socket
@@ -97,7 +98,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         //打卡本地蓝牙并设置可搜索
         if (checkBlueTooth()) {
             onConnect();
-            mCommandUtil = new CommandUtil(this, _socket);
         }
 
         initData();
@@ -118,7 +118,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         .setPositiveButton("确定", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                tasks.remove(i);
+//                                tasks.remove(i);
+                                doDelTask(tasks.get(i).getNum());
                                 mAdapter.notifyDataSetChanged();
 //                                Toast.makeText(MainActivity.this, "" + i, Toast.LENGTH_SHORT).show();
                             }
@@ -206,25 +207,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     /**
-     * 权限检测
-     */
-//    private void checkPermission() {
-    /* 解决兼容性问题，6.0以上使用新的API*/
-//        final int MY_PERMISSION_ACCESS_COARSE_LOCATION = 11;
-//        final int MY_PERMISSION_ACCESS_FINE_LOCATION = 12;
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-//            if (this.checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-//                requestPermissions(new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, MY_PERMISSION_ACCESS_COARSE_LOCATION);
-//                Log.e("11111", "ACCESS_COARSE_LOCATION");
-//            }
-//            if (this.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-//                requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, MY_PERMISSION_ACCESS_FINE_LOCATION);
-//                Log.e("11111", "ACCESS_FINE_LOCATION");
-//            }
-//        }
-//    }
-
-    /**
      * 打卡本地蓝牙并设置可搜索
      */
     private Boolean checkBlueTooth() {
@@ -290,11 +272,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     // MAC地址，由DeviceListActivity设置返回
                     address = data.getExtras()
                             .getString(DeviceListActivity.EXTRA_DEVICE_ADDRESS);
+
                     linkBluetooth(address);
                     //查询设备时间
-                    getDeviceTime();
+//                    getDeviceTime();
                     //获取任务列表
 //                    getTasks();
+//                    doDelTask(2);
 
                 }
                 break;
@@ -336,6 +320,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             return;
         }
 
+
         //打开接收线程
         try {
             is = _socket.getInputStream();   //得到蓝牙数据输入流
@@ -349,6 +334,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         } else {
             bRun = true;
         }
+        mCommandUtil = new CommandUtil(this, _socket);
+        //查询设备时间
+        getDeviceTime();
         //刷新界面
         refreshView();
     }
@@ -409,11 +397,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         }
                     }
                     //发送显示消息，进行显示刷新
-//                    System.out.println("****************msg=" + smsg);
-                    Message message = Message.obtain();
-                    message.obj = smsg;
-                    handler.sendMessage(message);
-                    smsg = "";
+//                    Message message = Message.obtain();
+//                    message.obj = smsg;
+//                    handler.sendMessage(message);
+                    handler.sendMessage(Message.obtain());
+
                     //此处处理板卡返回的信息
                 } catch (IOException e) {
                 }
@@ -427,8 +415,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
 
-            System.out.println("1111111111111111111msg = " + msg);
-            String receiveMsg = msg.obj.toString();
+            System.out.println("1111111111111111111msg = " + smsg );
+//            String receiveMsg = msg.obj.toString();
+            String receiveMsg = smsg;
+            smsg = "";
             //将收到的指令分成三段
             String[] msgArr = receiveMsg.split(":");
             //获取指令标志，并根据标志匹配指令
@@ -437,7 +427,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
             String data = "";
             if (msgArr.length >= 3) {
-                data = msgArr[2].replaceAll("\n","");
+                data = msgArr[2].replaceAll("\n", "");
             }
             switch (msgArr[0]) {
                 case TIME_REVISE:
@@ -446,7 +436,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     startTimeTask(data);
                     break;
                 case ADD_TASK:
+                    Toast.makeText(MainActivity.this, "任务设置成功", Toast.LENGTH_SHORT).show();
                     //添加任务
+                    if (AddActivity.instance == null) {
+                        return;
+                    }
+
+                    AddActivity.instance.finish();
+                    getTasks();
+
                     break;
                 case OPEN:
                     //手动开启
@@ -459,6 +457,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     break;
                 case DEL_TASK:
                     //删除任务
+                    Toast.makeText(MainActivity.this, "任务已删除", Toast.LENGTH_SHORT).show();
+                    getTasks();
                     break;
                 case QUERY_TASK:
                     //查询任务
@@ -470,33 +470,40 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     }
                     tasks.clear();
                     //根据返回的指令，获取task信息
-                    for (int i = 1; i< taskArr.length; i++) {
+                    for (int i = 1; i < taskArr.length; i++) {
                         String taskDetailStr = taskArr[i];
                         String[] taskDetailArr = taskDetailStr.split(",");
                         if (taskDetailArr == null || taskDetailArr.length < 1) {
                             return;
                         }
-                        Task task = new Task();
-                        task.setNum(Integer.parseInt(taskDetailArr[0]));
-                        task.setType(Integer.parseInt(taskDetailArr[1]));
-                        //获取重复日期总天数
-                        int dayNum = Integer.parseInt(taskDetailArr[2]);
-                        List<Integer> days = new ArrayList<>();
-                        //取出重复日期列表
-                        for(int d = 3; d < 3 + dayNum; d++) {
-                            days.add(Integer.parseInt(taskDetailArr[d]));
-                        }
-                        task.setDays(days);
-                        task.setHour(Integer.parseInt(taskDetailArr[3+dayNum]));
-                        task.setMinute(Integer.parseInt(taskDetailArr[3 + dayNum + 1]));
-                        task.setSec(Integer.parseInt(taskDetailArr[3 + dayNum + 2]));
-                        task.setYield(Integer.parseInt(taskDetailArr[3 + dayNum + 3]));
-                        task.setTime(Integer.parseInt(taskDetailArr[3 + dayNum + 4]));
+                        try {
+                            Task task = new Task();
+                            task.setNum(Integer.parseInt(taskDetailArr[0]));
+                            task.setType(Integer.parseInt(taskDetailArr[1]));
+                            //获取重复日期总天数
+                            int dayNum = Integer.parseInt(taskDetailArr[2]);
+                            List<Integer> days = new ArrayList<>();
+                            //取出重复日期列表
+                            for (int d = 3; d < 3 + dayNum; d++) {
+                                days.add(Integer.parseInt(taskDetailArr[d]));
+                            }
+                            task.setDays(days);
+                            task.setHour(Integer.parseInt(taskDetailArr[3 + dayNum]));
+                            task.setMinute(Integer.parseInt(taskDetailArr[3 + dayNum + 1]));
+                            task.setSec(Integer.parseInt(taskDetailArr[3 + dayNum + 2]));
+                            task.setYield(Integer.parseInt(taskDetailArr[3 + dayNum + 3]));
+                            task.setTime(Integer.parseInt(taskDetailArr[3 + dayNum + 4]));
 
-                        tasks.add(task);
+                            tasks.add(task);
+
+                            updateTaskList(tasks);
+                            mSwipeRefreshLayout.setRefreshing(false);
+                        } catch (Exception e) {
+
+                        }
+
                     }
-                    updateTaskList(tasks);
-                    mSwipeRefreshLayout.setRefreshing(false);
+
                     break;
                 case QUERY_TIME:
                     //查询时间
@@ -507,6 +514,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     break;
                 case INVALID:
                     //无效指令
+                    Toast.makeText(MainActivity.this, "无效指令：" + data, Toast.LENGTH_SHORT).show();
                     break;
                 default:
                     break;
@@ -620,25 +628,25 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         mCommandUtil = new CommandUtil(this, _socket);
         //新增任务时，判断新增的任务编号，若编号队列中有空缺，则为空缺，若无空缺，则为末尾编号加1
         int addNum = 0;
-        if (tasks == null || tasks.size() <1) {
+        if (tasks == null || tasks.size() < 1) {
             //当无任务列表时，新增任务编号为1
             addNum = 1;
-        } else if (tasks.size() > 20){
+        } else if (tasks.size() > 20) {
             Toast.makeText(MainActivity.this, "当前已存在20条任务，不能再新增，请删除部分任务再试吧", Toast.LENGTH_LONG).show();
             return;
         } else {
             if (tasks.get(0).getNum() != 1) {
                 //编号1空缺，则新增编号为编号1
                 addNum = 1;
-            } else{
+            } else {
                 for (int i = 1; i < tasks.size(); i++) {
                     //中途空缺，这新增编号为空缺编号
                     if (tasks.get(i).getNum() - tasks.get(i - 1).getNum() > 1) {
-                        addNum = tasks.get(i).getNum() + 1;
+                        addNum = tasks.get(i - 1).getNum() + 1;
                         break;
                     }
                     //编号无空缺，则新增编号为末尾编号加1
-                    addNum = tasks.get(tasks.size() -1).getNum() + 1;
+                    addNum = tasks.get(tasks.size() - 1).getNum() + 1;
                 }
             }
         }
@@ -675,13 +683,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     /**
-     * 处理接收到的消息
-     *
-     * @param smsg
+     * 删除任务
      */
-    private void receiveMsg(String smsg) {
-//        String a = smsg;
-//        System.out.println("********************smsg = " + smsg);
+    private void doDelTask(int num) {
+        new CommandUtil(this, _socket).sendDelTask(num);
     }
 
 
