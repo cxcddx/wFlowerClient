@@ -17,6 +17,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
@@ -196,14 +197,64 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if (_socket != null)  //关闭连接socket
-        {
+//        if (_socket != null)  //关闭连接socket
+//        {
+//            try {
+//                _socket.close();
+//            } catch (IOException e) {
+//            }
+//        }
+        onQuitButtonClicked();
+        //	_bluetooth.disable();  //关闭蓝牙服务
+    }
+
+    // 监视键盘的返回键
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            if (_socket != null) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(this)
+                        .setTitle("确定退出吗？")
+                        .setMessage("退出后将自动断开蓝牙连接")
+                        .setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                onQuitButtonClicked();
+                            }
+                        })
+                        .setNegativeButton("取消", null);
+                builder.show();
+                return false;
+            } else {
+                return super.onKeyDown(keyCode, event);
+            }
+
+        } else {
+            return super.onKeyDown(keyCode, event);
+        }
+    }
+
+    /**
+     *  退出按键响应函数
+     */
+
+    public void onQuitButtonClicked() {
+
+        //---安全关闭蓝牙连接再退出，避免报异常----//
+        if (_socket != null) {
+            //关闭连接socket
             try {
+                bRun = false;
+//                Thread.sleep(1000);
+
+                is.close();
                 _socket.close();
+                _socket = null;
             } catch (IOException e) {
             }
         }
-        //	_bluetooth.disable();  //关闭蓝牙服务
+
+        finish();
     }
 
     /**
@@ -415,7 +466,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
 
-            System.out.println("1111111111111111111msg = " + smsg );
+            System.out.println("1111111111111111111msg = " + smsg);
 //            String receiveMsg = msg.obj.toString();
             String receiveMsg = smsg;
             smsg = "";
@@ -476,8 +527,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         if (taskDetailArr == null || taskDetailArr.length < 1) {
                             return;
                         }
+
+                        Task task = new Task();
                         try {
-                            Task task = new Task();
                             task.setNum(Integer.parseInt(taskDetailArr[0]));
                             task.setType(Integer.parseInt(taskDetailArr[1]));
                             //获取重复日期总天数
@@ -493,14 +545,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             task.setSec(Integer.parseInt(taskDetailArr[3 + dayNum + 2]));
                             task.setYield(Integer.parseInt(taskDetailArr[3 + dayNum + 3]));
                             task.setTime(Integer.parseInt(taskDetailArr[3 + dayNum + 4]));
-
-                            tasks.add(task);
-
-                            updateTaskList(tasks);
-                            mSwipeRefreshLayout.setRefreshing(false);
                         } catch (Exception e) {
 
                         }
+
+                        tasks.add(task);
+                        updateTaskList(tasks);
+                        mSwipeRefreshLayout.setRefreshing(false);
 
                     }
 
