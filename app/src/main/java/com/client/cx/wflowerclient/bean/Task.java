@@ -71,6 +71,9 @@ public class Task implements Serializable {
     public int getHour() {
         return hour;
     }
+    public String getHourStr() {
+        return hour == 0 ? "00": hour +"";
+    }
 
     public void setHour(int hour) {
         this.hour = hour;
@@ -80,6 +83,9 @@ public class Task implements Serializable {
         return minute;
     }
 
+    public String getMinuteStr() {
+        return minute == 0 ? "00": minute +"";
+    }
     public void setMinute(int minute) {
         this.minute = minute;
     }

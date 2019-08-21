@@ -44,10 +44,10 @@ public class MyTaskAdapter extends RecyclerView.Adapter<MyTaskAdapter.MyViewHold
 
     @Override
     public void onBindViewHolder(MyViewHolder holder, final int position) {
-        if (datas == null || datas.size() <1) {
+        if (datas == null || datas.size() < 1) {
             return;
         }
-        holder.mTime.setText(datas.get(position).getHour() + ":" + datas.get(position).getMinute());
+        holder.mTime.setText(datas.get(position).getHourStr() + ":" + datas.get(position).getMinuteStr());
         holder.mTaskNum.setText(datas.get(position).getNum() + "");
         holder.mRepMsg.setText(datas.get(position).getRepMsg());
         holder.mYield.setText(datas.get(position).getYield() + "%");
@@ -65,13 +65,13 @@ public class MyTaskAdapter extends RecyclerView.Adapter<MyTaskAdapter.MyViewHold
                 Task task = datas.get(position);
                 int type = datas.get(position).getType();
                 if (type == Constance.MOUTH_EXE || type == Constance.MOUTH_INEXE) {
-                    if (((CheckBox)v).isChecked()) {
+                    if (((CheckBox) v).isChecked()) {
                         task.setType(Constance.MOUTH_EXE);
                     } else {
                         task.setType(Constance.MOUTH_INEXE);
                     }
                 } else {
-                    if (((CheckBox)v).isChecked()) {
+                    if (((CheckBox) v).isChecked()) {
                         task.setType(Constance.WEEK_EXE);
                     } else {
                         task.setType(Constance.WEEK_INEXE);
@@ -96,7 +96,7 @@ public class MyTaskAdapter extends RecyclerView.Adapter<MyTaskAdapter.MyViewHold
             public void onClick(View v) {
                 Intent intent = new Intent(mContext, AddActivity.class);
                 intent.putExtra("type", "edit");
-                intent.putExtra("task",  datas.get(position));
+                intent.putExtra("task", datas.get(position));
                 mContext.startActivity(intent);
             }
         });

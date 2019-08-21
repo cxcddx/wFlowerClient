@@ -43,12 +43,12 @@ public class Divider extends RecyclerView.ItemDecoration {
         int right = lineWidth;
         int bottom = lineHeight;
         if (isNotDrawBottom(view, parent, currentPosition, spanCount, childCount))
-            // 如果是最后一行，则不需要绘制底部
+        // 如果是最后一行，则不需要绘制底部
         {
             bottom = 0;
         }
         if (isNotDrawRight(view, parent, currentPosition, spanCount, childCount))
-            // 如果是最后一列，则不需要绘制右边
+        // 如果是最后一列，则不需要绘制右边
         {
             right = 0;
         }
@@ -155,7 +155,7 @@ public class Divider extends RecyclerView.ItemDecoration {
         boolean isDrawDoubleLine = false;
         RecyclerView.LayoutManager layoutManager = parent.getLayoutManager();
         if (layoutManager instanceof StaggeredGridLayoutManager && ((StaggeredGridLayoutManager) layoutManager).getOrientation() == StaggeredGridLayoutManager.HORIZONTAL)
-            // 绘制双线
+        // 绘制双线
         {
             isDrawDoubleLine = true;
         }
@@ -173,7 +173,7 @@ public class Divider extends RecyclerView.ItemDecoration {
             final View child = parent.getChildAt(i);
             int currentPosition = parent.getChildAdapterPosition(child);
             if (isSkipDraw(parent, child))
-                // 跳过，直接返回
+            // 跳过，直接返回
             {
                 continue;
             }
@@ -215,7 +215,7 @@ public class Divider extends RecyclerView.ItemDecoration {
         boolean isDrawDoubleLine = false;
         RecyclerView.LayoutManager layoutManager = parent.getLayoutManager();
         if (layoutManager instanceof StaggeredGridLayoutManager && ((StaggeredGridLayoutManager) layoutManager).getOrientation() == StaggeredGridLayoutManager.VERTICAL)
-            // 绘制双线
+        // 绘制双线
         {
             isDrawDoubleLine = true;
         }
@@ -232,7 +232,7 @@ public class Divider extends RecyclerView.ItemDecoration {
             final View child = parent.getChildAt(i);
             int currentPosition = parent.getChildAdapterPosition(child);
             if (isSkipDraw(parent, child))
-                // 跳过、不绘制右部，直接返回
+            // 跳过、不绘制右部，直接返回
             {
                 continue;
             }
@@ -240,7 +240,7 @@ public class Divider extends RecyclerView.ItemDecoration {
             if (!isNotDrawRight(child, parent, currentPosition, spanCount, adapterCount)) {
                 // 不绘制右边
                 if (isNotDrawBottom(child, parent, currentPosition, spanCount, adapterCount))
-                    // 不绘制底部，公共区域不绘制
+                // 不绘制底部，公共区域不绘制
                 {
                     lineHeight = 0;
                 }

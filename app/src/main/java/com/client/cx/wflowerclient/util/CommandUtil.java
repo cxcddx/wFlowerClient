@@ -106,6 +106,7 @@ public class CommandUtil {
 
     /**
      * 手动开启
+     *
      * @param yield 喷水量
      */
     public void sendStart(int yield) {
@@ -132,7 +133,7 @@ public class CommandUtil {
         int second = 0;
         for (int i = 0; i < task.getDays().size(); i++) {
             dayStr.append(task.getDays().get(i));
-            if (i < task.getDays().size()-1) {
+            if (i < task.getDays().size() - 1) {
                 dayStr.append(",");
             }
         }
@@ -153,6 +154,7 @@ public class CommandUtil {
         str.append(QUERY_TIME).append("\n");
         sendMsg(str.toString());
     }
+
     /**
      * 获取任务列表
      */
@@ -161,6 +163,7 @@ public class CommandUtil {
         str.append(QUERY_TASK).append("\n");
         sendMsg(str.toString());
     }
+
     /**
      * 删除任务
      */

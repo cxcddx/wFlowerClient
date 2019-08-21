@@ -235,7 +235,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     /**
-     *  退出按键响应函数
+     * 退出按键响应函数
      */
 
     public void onQuitButtonClicked() {
@@ -325,12 +325,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             .getString(DeviceListActivity.EXTRA_DEVICE_ADDRESS);
 
                     linkBluetooth(address);
-                    //查询设备时间
-//                    getDeviceTime();
-                    //获取任务列表
-//                    getTasks();
-//                    doDelTask(2);
-
                 }
                 break;
             default:
@@ -466,7 +460,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
 
-            System.out.println("1111111111111111111msg = " + smsg);
 //            String receiveMsg = msg.obj.toString();
             String receiveMsg = smsg;
             smsg = "";
@@ -585,7 +578,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         try {
             //将字符串数据转化为毫秒数
             c.setTime(new SimpleDateFormat("yyyy,MM,dd,HH,mm,ss").parse(data));
-//                        System.out.println("时间转化后的毫秒数为：" + c.getTimeInMillis());
             millisTime = c.getTimeInMillis();
 
             // 将毫秒数转化为时间
@@ -618,7 +610,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         String time;
         Date date = new Date(millisTime);
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-//                        System.out.println("毫秒数转化后的时间为：" + sdf.format(date));
         time = sdf.format(date);
         return time;
     }
@@ -686,12 +677,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             Toast.makeText(MainActivity.this, "当前已存在20条任务，不能再新增，请删除部分任务再试吧", Toast.LENGTH_LONG).show();
             return;
         } else {
-            if (tasks.get(0).getNum() != 1) {
+            if (tasks.size() == 1) {
+                //当任务列表只有一个任务时
+                if (tasks.get(0).getNum() == 1) {
+                    addNum = 2;
+                } else {
+                    addNum = 1;
+                }
+            } else if (tasks.get(0).getNum() != 1) {
                 //编号1空缺，则新增编号为编号1
                 addNum = 1;
             } else {
                 for (int i = 1; i < tasks.size(); i++) {
-                    //中途空缺，这新增编号为空缺编号
+                    //中途空缺，则新增编号为空缺编号
                     if (tasks.get(i).getNum() - tasks.get(i - 1).getNum() > 1) {
                         addNum = tasks.get(i - 1).getNum() + 1;
                         break;

@@ -29,7 +29,7 @@ public class MyDateAdapter extends RecyclerView.Adapter<MyDateAdapter.MyViewHold
         this.mContext = context;
         this.dateList = dateList;
         this.initCheckedList = checkedList;
-        if (!(initCheckedList != null && initCheckedList.size()>0)) {
+        if (!(initCheckedList != null && initCheckedList.size() > 0)) {
             for (int i = 0; i < dateList.size(); i++) {
                 setItemChecked(i, false);
             }
